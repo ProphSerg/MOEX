@@ -166,7 +166,7 @@ class MTEMSG:
         if _res == ASTS.MTE_TSMR:
             return c_char_p(self._data).value.decode('cp1251')
         elif _res != ASTS.MTE_OK:
-            return ''
+            return None
 
         MTES = {
             'ИмяИнтерфейса': self._getString(),

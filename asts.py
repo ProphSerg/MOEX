@@ -95,6 +95,8 @@ class ASTS:
         self._lib = cdll.LoadLibrary(os.path.join(LIBPATH, 'libmtesrl.so'))
         self._ErrorMsg = create_string_buffer(256)
         self.ConnStats = ASTS.ConnectionStats()
+        self._mtemsg = mtemsg.MTEMSG()
+        self.Structure = None
 
         #char* MTEErrorMsg(int32_t code);
         self._lib.MTEErrorMsg.argtypes = [c_int32, ]
@@ -132,6 +134,9 @@ class ASTS:
         #int32_t __callspec MTEStructureEx(int32_t conno, int32_t version, MTEMSG **msg);
         self._lib.MTEStructureEx.argtypes = [c_int32, c_int32, POINTER(POINTER(mtemsg.MTEMSG.MSG))]
         self._lib.MTEStructureEx.restype = c_int32
+        #int32_t MTEOpenTable(int32_t conno, const char *name, const char *params, int32_t complete, MTEMSG **msg);
+        self._lib.MTEOpenTable.argtypes = [c_int32, c_char_p, c_char_p, c_int32, POINTER(POINTER(mtemsg.MTEMSG.MSG))]
+        self._lib.MTEOpenTable.restype = c_int32
 
 
     def ErrorMsg(self):
@@ -217,22 +222,30 @@ class ASTS:
 
     #int32_t MTEStructure(int32_t conno, MTEMSG **msg);
     def MTEStructure(self):
-        _msg = mtemsg.MTEMSG()
-        res = self._lib.MTEStructure(self._Idx, _msg.pointer())
-        return (res, _msg.toMTEStructure(res, 1))
+        res = self._lib.MTEStructure(self._Idx, self._mtemsg.pointer())
+        self.Structure = self._mtemsg.toMTEStructure(res, 1)
+        return res
 
     #int32_t MTEStructure2(int32_t conno, MTEMSG **msg);
     def MTEStructure2(self):
-        #self._lib.MTEStructure2.argtypes = [c_int32, POINTER(c_char *8)]
-        _msg = mtemsg.MTEMSG()
-        res = self._lib.MTEStructure2(self._Idx, _msg.pointer())
-        return (res, _msg.toMTEStructure(res, 2))
+        res = self._lib.MTEStructure2(self._Idx, self._mtemsg.pointer())
+        self.Structure = self._mtemsg.toMTEStructure(res, 2)
+        return res
 
     # int32_t __callspec MTEStructureEx(int32_t conno, int32_t version, MTEMSG **msg);
     def MTEStructureEx(self, _version):
-        _msg = mtemsg.MTEMSG()
-        res = self._lib.MTEStructureEx(self._Idx, _version, _msg.pointer())
-        return (res, _msg.toMTEStructure(res, _version))
+        res = self._lib.MTEStructureEx(self._Idx, _version, self._mtemsg.pointer())
+        self.Structure = self._mtemsg.toMTEStructure(res, _version)
+        return res
+
+    #int32_t MTEOpenTable(int32_t conno, const char *name, const char *params, int32_t complete, MTEMSG **msg);
+    def MTEOpenTable(self, _table, _params, _complete):
+        if not isinstance(self.Structure, dict):
+            res = self.MTEStructure2()
+            if res != ASTS.MTE_OK:
+                return res
+        res = self._lib.MTEOpenTable(self._Idx, _table, _params, _complete, self._mtemsg.pointer())
+
 
 '''
 int32_t MTEExecTransEx(int32_t conno, const char *name, const char *params, int32_t clientIP, MteTransResult *result);
@@ -240,7 +253,6 @@ int32_t MTEExecTransEx(int32_t conno, const char *name, const char *params, int3
 int32_t MTEExecTrans(int32_t conno, const char *name, const char *params, char *error);
 int32_t MTEExecTransIP(int32_t conno, const char *name, const char *params, char *error, int32_t clientIP);
 
-int32_t MTEOpenTable(int32_t conno, const char *name, const char *params, int32_t complete, MTEMSG **msg);
 int32_t MTEAddTable(int32_t conno, int32_t tabno, int32_t ref);
 int32_t MTERefresh(int32_t conno, MTEMSG **msg);
 int32_t MTECloseTable(int32_t conno, int32_t tabno);
@@ -266,9 +278,9 @@ if __name__ == '__main__':
         'SERVER': 'UAT_GATEWAY',
         'SERVICE': '16411/16412',
         'BROADCAST': '91.208.232.211',
-        'USERID': 'MU9050300002',
+        'USERID': 'MU9050300001',
         'PASSWORD': '6204',
-        'LANGUAGE': ASTS.LANGUAGE_ENG,
+        'LANGUAGE': ASTS.LANGUAGE_RUS,
         'LOGFOLDER': os.path.dirname(os.path.abspath(__file__)) + '/log/',
         'LOGGING': '4,2',
         'LOGLEVEL': '30',
@@ -290,8 +302,13 @@ if __name__ == '__main__':
     print('MTEStructure (%d): %s' %(res[0], asts.MTEErrorMsg(res[0])))
     '''
     res = asts.MTEStructure2()
-    print('MTEStructure2 (%d): %s' %(res[0], asts.MTEErrorMsg(res[0])))
-    print(json.dumps(res[1]['Таблицы'], skipkeys=False, ensure_ascii=False, indent=2))
+    print('MTEStructure2 (%d): %s' %(res, asts.MTEErrorMsg(res)))
+    print(json.dumps(asts.Structure['Таблицы'], skipkeys=False, ensure_ascii=False, indent=2))
+    '''
+    with open('MTEStructure.json', 'w') as fp:
+        json.dump(asts.Structure, fp=fp, skipkeys=False, ensure_ascii=False, indent=4)
+    '''
+
     '''
     res = asts.MTEStructureEx(2)
     print('MTEStructureEx (%d): %s' %(res[0], asts.MTEErrorMsg(res[0])))
