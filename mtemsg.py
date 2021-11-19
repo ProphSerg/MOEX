@@ -1,5 +1,6 @@
 from ctypes import *
 from asts import ASTS
+from metrics import Metrics
 
 class MTEMSG:
     class MSG(Structure):
@@ -10,17 +11,20 @@ class MTEMSG:
 
     def __init__(self):
         self._msg = POINTER(MTEMSG.MSG)()
-        #self._msg = (c_char * 8)()
-        pass
+        self.MTEStructure = None
+        self.ErrorStr = None
+        self._version = None
+        self.MTETables = {}
+
+    def isMTEStructure(self):
+        return self.MTEStructure != None
 
     def pointer(self):
         return byref(self._msg)
 
     def _toData(self):
-        self._data = cast(byref(self._msg[0]), POINTER(c_char * (self._msg.contents.DataLen + 4))).contents
-        #self._data = self._msg.contents.Data.contents
-        #self._dataLen = int.from_bytes(self._msg[0:4], byteorder='little', signed=False)
-        #self._data = cast(self._msg[4:], POINTER(c_char * self._dataLen)).contents
+        self._dataLen = self._msg.contents.DataLen
+        self._data = cast(byref(self._msg[0]), POINTER(c_char * (self._dataLen + 4))).contents
         self._offset = 4
 
     def _getString(self):
@@ -40,13 +44,19 @@ class MTEMSG:
         self._offset += 1
         return _byte
 
+    def _getByteList(self, _size):
+        _byte = []
+        for i in range(_size):
+            _byte.append(self._data[self._offset:self._offset + 1])
+            self._offset += 1
+        return _byte
+
     def _getByteArray(self, _size):
         _byte = self._data[self._offset:self._offset + _size]
         self._offset += _size
         return _byte
 
     ENUM_KIND = ('ekCheck', 'egGroup', 'ekCombo')
-
     def _getEnumConst(self):
         if self._version >= 2:
             return {
@@ -71,8 +81,6 @@ class MTEMSG:
             'Размер': self._getInteger(),
             'Тип': MTEMSG.ENUM_KIND[self._getInteger()],
             'Константа': self._getEnumConsts(),
-            #'': self._get(),
-            #'': self._get(),
         }
 
     def _getEnumTypes(self):
@@ -82,10 +90,11 @@ class MTEMSG:
         return _res
 
     FIELD_FLAGS = {
-        0x01: 'ffKey',
-        0x02: 'ffSecCode',
-        0x04: 'ffNotNull',
-        0x08: 'ffVarBlock'
+        0x01: 'ffKey',      # Поле является ключевым. Строки таблицы с совпадающими значениями ключевых полей должны объединяться в одну строку
+        0x02: 'ffSecCode',  # Поле содержит код финансового инструмента. Рекомендуется учитывать данный флаг при автоматизации процедуры определения
+                            # числа знаков после запятой в числовых полях типа ftFloat
+        0x04: 'ffNotNull',  # Поле не может быть пустым
+        0x08: 'ffVarBlock'  # Поле входит в группу полей, которые могут повторяться несколько раз
     }
     def _getFieldFlags(self):
         _fl = self._getInteger()
@@ -116,9 +125,9 @@ class MTEMSG:
         return _res
 
     TABLE_FLAGS = {
-        0x01: 'tfUpdateable',
-        0x02: 'tfClearOnUpdate',
-        0x04: 'tfOrderbook'
+        0x01: 'tfUpdateable',       # таблица является обновляемой. Для нее можно вызывать функции MTEAddTable/MTERefresh
+        0x02: 'tfClearOnUpdate',    # старое содержимое таблицы должно удаляться при получении каждого обновления с помощью функций MTEAddTable/MTERefresh
+        0x04: 'tfOrderbook'         # таблица имеет формат котировок и должна обрабатываться соответсвующим образом (см. Замечания по работе с таблицами)
     }
     def _getTableFlags(self):
         _fl = self._getInteger()
@@ -160,22 +169,76 @@ class MTEMSG:
             _res.append(self._getTransaction())
         return _res
 
+    MSG_MODE_STRUCTURE = 0
+    MSG_MODE_TABLE = 1
+    def _prepareData(self, _res, mode = MSG_MODE_STRUCTURE):
+        if _res in (ASTS.MTE_OK, ASTS.MTE_TSMR) or _res > ASTS.MTE_OK:
+            if mode == MTEMSG.MSG_MODE_STRUCTURE:
+                self.MTEStructure = None
+            self.ErrorStr = None
+            self._toData()
+            if _res == ASTS.MTE_TSMR:
+                self.ErrorStr = c_char_p(self._data[self._offset:]).value.decode('cp1251')
+
     def toMTEStructure(self, _res, _vers):
         self._version = _vers
-        self._toData()
-        if _res == ASTS.MTE_TSMR:
-            return c_char_p(self._data).value.decode('cp1251')
-        elif _res != ASTS.MTE_OK:
-            return None
+        self._prepareData(_res)
+        if _res == ASTS.MTE_OK:
+            self.MTEStructure = {
+                'Версия': self._version,
+                'ИмяИнтерфейса': self._getString(),
+                'ЗаголовокИнтерфейса': self._getString(),
+                'ОписаниеИнтерфейса': self._getString() if self._version >= 2 else None,
+                'НомерMsgSet': self._getString() if self._version >= 4 else None,
+                'ПеречислимыеТипы': self._getEnumTypes(),
+                'Таблицы': self._getTables(),
+                'Транзакции': self._getTransactions(),
+            }
 
-        MTES = {
-            'ИмяИнтерфейса': self._getString(),
-            'ЗаголовокИнтерфейса': self._getString(),
-            'ОписаниеИнтерфейса': self._getString() if self._version >= 2 else None,
-            'НомерMsgSet': self._getString() if self._version >= 4 else None,
-            'ПеречислимыеТипы': self._getEnumTypes(),
-            'Таблицы': self._getTables(),
-            'Транзакции': self._getTransactions(),
+    def _findTableFields(self, _table):
+        f = []
+        for tbl in self.MTEStructure['Таблицы']:
+            if tbl['Имя'] ==  _table:
+                for fld in tbl['ВыходныеПоля']:
+                    f.append({
+                        'name': fld['Имя'],
+                        'type': fld['Тип'],
+                        'size': fld['Размер'],
+                        'dec': fld['КолвоДесятичЗнаков'],
+                        'key': True if 'ffKey' in fld['Атрибуты'] else False,
+                    })
+        return f
+
+    def _getRow(self, _flds):
+        _cFld = int.from_bytes(self._getByte(), signed=False, byteorder='little')
+        _dataLen = self._getInteger()
+        _numberFlds = self._getByteList(_cFld) if _cFld > 0 else list(range(len(_flds)))
+        _dataFlds = self._getByteArray(_dataLen)
+        _offset = 0
+        _row = {}
+        for i in _numberFlds:
+            if isinstance(i, bytes):
+                i = int.from_bytes(i, signed=False, byteorder='little')
+            _row[_flds[i]['name']] = _dataFlds[_offset:_offset + _flds[i]['size']].decode('cp1251')
+            _offset += _flds[i]['size']
+
+        return _row
+
+    def _getRows(self, _flds):
+        _res = []
+        for i in range(self._getInteger()):
+            _res.append(self._getRow(_flds))
+        return _res
+
+    def toMTETable(self, _res, _table):
+        self._prepareData(_res, mode=MTEMSG.MSG_MODE_TABLE)
+        if _res < ASTS.MTE_OK:
+            return
+
+        _fld = self._findTableFields(_table)
+        self.MTETables[_table] = {
+            'HTable': _res,
+            'Ref': self._getInteger(),
+            'fields': _fld,
+            'rows': self._getRows(_fld)
         }
-
-        return MTES

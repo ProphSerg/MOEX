@@ -2,6 +2,7 @@ from ctypes import *
 import os
 import json
 import mtemsg
+from metrics import Metrics
 
 class ASTS:
     MTE_OK = 0
@@ -94,7 +95,7 @@ class ASTS:
             LIBPATH = os.path.dirname(os.path.abspath(__file__))
         self._lib = cdll.LoadLibrary(os.path.join(LIBPATH, 'libmtesrl.so'))
         self._ErrorMsg = create_string_buffer(256)
-        self.ConnStats = ASTS.ConnectionStats()
+        self.ConnStats = self.ConnectionStats()
         self._mtemsg = mtemsg.MTEMSG()
         self.Structure = None
 
@@ -120,7 +121,7 @@ class ASTS:
         self._lib.MTEConnectionStatus.argtypes = [c_int32, ]
         self._lib.MTEConnectionStatus.restype = c_int32
         #int32_t MTEConnectionStats(int32_t conno, ConnectionStats *stats);
-        self._lib.MTEConnectionStats.argtypes = [c_int32, POINTER(ASTS.ConnectionStats)]
+        self._lib.MTEConnectionStats.argtypes = [c_int32, POINTER(self.ConnectionStats)]
         self._lib.MTEConnectionStats.restype = c_int32
         #int32_t MTESelectBoards(int32_t conno, const char *boards, char *result);
         self._lib.MTESelectBoards.argtypes = [c_int32, c_char_p, c_char_p]
@@ -137,10 +138,25 @@ class ASTS:
         #int32_t MTEOpenTable(int32_t conno, const char *name, const char *params, int32_t complete, MTEMSG **msg);
         self._lib.MTEOpenTable.argtypes = [c_int32, c_char_p, c_char_p, c_int32, POINTER(POINTER(mtemsg.MTEMSG.MSG))]
         self._lib.MTEOpenTable.restype = c_int32
+        #int32_t MTEAddTable(int32_t conno, int32_t tabno, int32_t ref);
+        self._lib.MTEAddTable.argtypes = [c_int32, c_int32, c_int32]
+        self._lib.MTEAddTable.restype = c_int32
+        #int32_t MTERefresh(int32_t conno, MTEMSG **msg);
+        self._lib.MTERefresh.argtypes = [c_int32, POINTER(POINTER(mtemsg.MTEMSG.MSG))]
+        self._lib.MTERefresh.restype = c_int32
+        #int32_t MTECloseTable(int32_t conno, int32_t tabno);
+        self._lib.MTECloseTable.argtypes = [c_int32, c_int32]
+        self._lib.MTECloseTable.restype = c_int32
+        #int32_t MTEFreeBuffer(int32_t conno);
+        self._lib.MTEFreeBuffer.argtypes = [c_int32, ]
+        self._lib.MTEFreeBuffer.restype = c_int32
 
 
     def ErrorMsg(self):
         return self._ErrorMsg.value.decode('cp1251')
+
+    def MSGError(self):
+        return self._mtemsg.ErrorStr if self._mtemsg.ErrorStr != None else ''
 
     #char* MTEGetVersion();
     def MTEGetVersion(self):
@@ -148,16 +164,17 @@ class ASTS:
 
     #char* MTEErrorMsg(int32_t code);
     def MTEErrorMsg(self, code):
-        return self._lib.MTEErrorMsg(code).decode('utf-8')
+        return self._lib.MTEErrorMsg(code).decode('cp1251')
 
     #char* MTEErrorMsgEx(int32_t code, const char *language);
     def MTEErrorMsgEx(self, code, lang=LANGUAGE_ENG):
-        return self._lib.MTEErrorMsgEx(code, lang.encode('utf-8')).decode('utf-8')
+        return self._lib.MTEErrorMsgEx(code, lang.encode('utf-8')).decode('cp1251')
 
     #int32_t MTEConnect(const char *params, char *error);
+    @Metrics()
     def MTEConnect(self, params):
         sParams = '\n'.join(['{0}={1}'.format(str(k), str(v)) for (k,v) in params.items()])
-        self.debug(sParams)
+        #self.debug(sParams)
         self._Idx = self._lib.MTEConnect(sParams.encode('utf-8'), self._ErrorMsg)
         return self._Idx
 
@@ -176,6 +193,7 @@ class ASTS:
         return self._lib.MTEDisconnect(self._Idx)
 
     #int32_t MTEGetServInfo(int32_t conno, char **buffer, int32_t *len);
+    @Metrics()
     def MTEGetServInfo(self):
         _si = POINTER(c_char)()
         _len = c_int32()
@@ -215,48 +233,73 @@ class ASTS:
         return self._lib.MTEConnectionStats(self._Idx, self.ConnStats)
 
     #int32_t MTESelectBoards(int32_t conno, const char *boards, char *result);
+    @Metrics()
     def MTESelectBoards(self, _boards):
         _resMsg = create_string_buffer(256)
         res = self._lib.MTESelectBoards(self._Idx, _boards.encode('utf-8'), _resMsg)
         return (res, _resMsg.value.decode('cp1251') if res in ASTS.MTE_TRANSPROCESSED else '')
 
     #int32_t MTEStructure(int32_t conno, MTEMSG **msg);
+    @Metrics()
     def MTEStructure(self):
         res = self._lib.MTEStructure(self._Idx, self._mtemsg.pointer())
-        self.Structure = self._mtemsg.toMTEStructure(res, 1)
+        self._mtemsg.toMTEStructure(res, 1)
         return res
 
     #int32_t MTEStructure2(int32_t conno, MTEMSG **msg);
+    @Metrics()
     def MTEStructure2(self):
         res = self._lib.MTEStructure2(self._Idx, self._mtemsg.pointer())
-        self.Structure = self._mtemsg.toMTEStructure(res, 2)
+        self._mtemsg.toMTEStructure(res, 2)
         return res
 
     # int32_t __callspec MTEStructureEx(int32_t conno, int32_t version, MTEMSG **msg);
+    @Metrics()
     def MTEStructureEx(self, _version):
         res = self._lib.MTEStructureEx(self._Idx, _version, self._mtemsg.pointer())
-        self.Structure = self._mtemsg.toMTEStructure(res, _version)
+        self._mtemsg.toMTEStructure(res, _version)
         return res
 
     #int32_t MTEOpenTable(int32_t conno, const char *name, const char *params, int32_t complete, MTEMSG **msg);
+    @Metrics()
     def MTEOpenTable(self, _table, _params, _complete):
-        if not isinstance(self.Structure, dict):
-            res = self.MTEStructure2()
-            if res != ASTS.MTE_OK:
+        if not self._mtemsg.isMTEStructure():
+            _res = self.MTEStructure2()
+            if _res != ASTS.MTE_OK:
                 return res
-        res = self._lib.MTEOpenTable(self._Idx, _table, _params, _complete, self._mtemsg.pointer())
+        Metrics.startMetric('lib.MTEOpenTable')
+        _res = self._lib.MTEOpenTable(self._Idx, _table.encode('utf-8'), _params.encode('utf-8'), _complete, self._mtemsg.pointer())
+        Metrics.stopMetric()
+        Metrics.startMetric('mtemsg.toMTETable')
+        self._mtemsg.toMTETable(_res, _table)
 
+        return _res
+
+    #int32_t MTEAddTable(int32_t conno, int32_t tabno, int32_t ref);
+    @Metrics
+    def MTEAddTable(self, _tabno, _ref=None):
+        pass
+
+    #int32_t MTERefresh(int32_t conno, MTEMSG **msg);
+    @Metrics
+    def MTERefresh(self):
+        pass
+
+    #int32_t MTECloseTable(int32_t conno, int32_t tabno);
+    @Metrics
+    def MTECloseTable(self, _tabno):
+        return self._lib.MTECloseTable(self._Idx, _tabno)
+
+    #int32_t MTEFreeBuffer(int32_t conno);
+    @Metrics
+    def MTEFreeBuffer(self):
+        return self._lib.MTEFreeBuffer(self._Idx)
 
 '''
 int32_t MTEExecTransEx(int32_t conno, const char *name, const char *params, int32_t clientIP, MteTransResult *result);
 
 int32_t MTEExecTrans(int32_t conno, const char *name, const char *params, char *error);
 int32_t MTEExecTransIP(int32_t conno, const char *name, const char *params, char *error, int32_t clientIP);
-
-int32_t MTEAddTable(int32_t conno, int32_t tabno, int32_t ref);
-int32_t MTERefresh(int32_t conno, MTEMSG **msg);
-int32_t MTECloseTable(int32_t conno, int32_t tabno);
-int32_t MTEFreeBuffer(int32_t conno);
 
 int32_t MTEGetSnapshot(int32_t conno, char **buffer, int32_t *len);
 int32_t MTESetSnapshot(int32_t conno, const char *buffer, int32_t len, char *error);
@@ -282,14 +325,16 @@ if __name__ == '__main__':
         'PASSWORD': '6204',
         'LANGUAGE': ASTS.LANGUAGE_RUS,
         'LOGFOLDER': os.path.dirname(os.path.abspath(__file__)) + '/log/',
-        'LOGGING': '4,2',
+        'LOGGING': '2,2',
         'LOGLEVEL': '30',
         'BOARDS': 'TQCB',
+#        'BOARDS': 'TQCB,PSAU,PSBB,TQIR,TQBR,TQPI',
     })
     asts.printConnectStatus()
-    '''
+
     res = asts.MTEGetServInfo()
     print('MTEGetServInfo (%d): %s' %(res, asts.MTEErrorMsg(res)))
+    '''
     print(json.dumps(asts.ServInfo, skipkeys=True, ensure_ascii=False, indent=2))
 
     res = asts.MTEConnectionStatus()
@@ -299,21 +344,31 @@ if __name__ == '__main__':
     print('MTEConnectionStats (%d): %s' %(res, asts.MTEErrorMsg(res)))
     
     res = asts.MTEStructure()
-    print('MTEStructure (%d): %s' %(res[0], asts.MTEErrorMsg(res[0])))
+    print('MTEStructure (%d): %s' %(res, asts.MTEErrorMsg(res)))
+    '''
     '''
     res = asts.MTEStructure2()
     print('MTEStructure2 (%d): %s' %(res, asts.MTEErrorMsg(res)))
-    print(json.dumps(asts.Structure['Таблицы'], skipkeys=False, ensure_ascii=False, indent=2))
+    print(json.dumps(asts._mtemsg.MTEStructure['Таблицы'], skipkeys=False, ensure_ascii=False, indent=2))
+    '''
     '''
     with open('MTEStructure.json', 'w') as fp:
-        json.dump(asts.Structure, fp=fp, skipkeys=False, ensure_ascii=False, indent=4)
+        json.dump(asts._mtemsg.MTEStructure, fp=fp, skipkeys=False, ensure_ascii=False, indent=4)
     '''
 
     '''
     res = asts.MTEStructureEx(2)
-    print('MTEStructureEx (%d): %s' %(res[0], asts.MTEErrorMsg(res[0])))
+    print('MTEStructureEx (%d): %s' %(res, asts.MTEErrorMsg(res)))
 
     res = asts.MTESelectBoards('TQIR')
     #res = asts.MTESelectBoards('CETS')
     print('MTESelectBoards (%d): %s (%s)' %(res[0], asts.MTEErrorMsg(res[0]), res[1]))
+    '''
+
+    res = asts.MTEOpenTable('SECURITIES', '        ', False)
+    print('MTEOpenTable (%d): %s <%s>' %(res, asts.MTEErrorMsg(res), asts.MSGError()))
+    '''
+    if res >= ASTS.MTE_OK:
+        with open('MTEOpenTable.json', 'w') as fp:
+            json.dump(asts._mtemsg.MTETables, fp=fp, skipkeys=False, ensure_ascii=False, indent=4)
     '''
