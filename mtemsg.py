@@ -24,6 +24,7 @@ class MTEMSG:
 
     def _toData(self):
         self._dataLen = self._msg.contents.DataLen
+        Metrics.info('Read: {0:,d} bytes'.format(self._dataLen))
         self._data = cast(byref(self._msg[0]), POINTER(c_char * (self._dataLen + 4))).contents
         self._offset = 4
 
@@ -180,6 +181,7 @@ class MTEMSG:
             if _res == ASTS.MTE_TSMR:
                 self.ErrorStr = c_char_p(self._data[self._offset:]).value.decode('cp1251')
 
+    @Metrics()
     def toMTEStructure(self, _res, _vers):
         self._version = _vers
         self._prepareData(_res)
@@ -230,15 +232,39 @@ class MTEMSG:
             _res.append(self._getRow(_flds))
         return _res
 
+    @Metrics()
     def toMTETable(self, _res, _table):
         self._prepareData(_res, mode=MTEMSG.MSG_MODE_TABLE)
         if _res < ASTS.MTE_OK:
-            return
+            return _res
 
-        _fld = self._findTableFields(_table)
-        self.MTETables[_table] = {
-            'HTable': _res,
-            'Ref': self._getInteger(),
-            'fields': _fld,
-            'rows': self._getRows(_fld)
-        }
+        self._getTableData(_res, _table)
+
+    @Metrics()
+    def toMTETables(self, _res):
+        self._prepareData(_res, mode=MTEMSG.MSG_MODE_TABLE)
+        if _res < ASTS.MTE_OK:
+            return _res
+
+        for i in range(self._getInteger()):
+            self._getTableData()
+
+    def _getTableData(self, _HTable=None, _tableName=None):
+        _ref = self._getInteger()
+        if _HTable is not None:
+            _fld = self._findTableFields(_tableName)
+            self.MTETables[_HTable] = {
+                'TableName': _tableName,
+                'fields': _fld,
+            }
+        else:
+            _HTable = _ref
+            _fld = self.MTETables[_HTable]['fields']
+        self.MTETables[_HTable]['rows'] = self._getRows(_fld)
+
+    def findTable(self, table):
+        for t in self.MTETables:
+            if self.MTETables[t]['TableName'] == table:
+                return t
+
+        return -100

@@ -31,9 +31,19 @@ class Metrics:
         Metrics._QUEUE.append((_name, time_ns()))
 
     @staticmethod
-    def stopMetric(timeSize='ms'):
+    def stopMetric(timeSize='ms', *args):
         arg = Metrics._QUEUE.pop()
-        print('%s Stop: %s. Time: %s' % ('>>' * (len(Metrics._QUEUE) + 1), arg[0], Metrics._time_execute(timeBegin=arg[1], timeSize=timeSize)))
+        print('%s Stop: %s. Time: %s. %s' % (
+                '>>' * (len(Metrics._QUEUE) + 1),
+                arg[0],
+                Metrics._time_execute(timeBegin=arg[1], timeSize=timeSize),
+                '. '.join(args)
+            )
+        )
+
+    @staticmethod
+    def info(*args):
+        print('%s Info: %s' % ('==' * (len(Metrics._QUEUE)), ', '.join(map(str, args))))
 
     @staticmethod
     def _time_execute(timeBegin, timeEnd=None, timeSize='ms'):
