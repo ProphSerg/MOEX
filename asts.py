@@ -343,7 +343,7 @@ if __name__ == '__main__':
         'LOGFOLDER': os.path.dirname(os.path.abspath(__file__)) + '/log/',
         'LOGGING': '2,2',
         'LOGLEVEL': '30',
-        'BOARDS': 'TQCB',
+        #'BOARDS': 'TQCB',
 #        'BOARDS': 'TQCB,PSAU,PSBB,TQIR,TQBR,TQPI',
     })
     asts.printConnectStatus()
@@ -381,14 +381,36 @@ if __name__ == '__main__':
     print('MTESelectBoards (%d): %s (%s)' %(res[0], asts.MTEErrorMsg(res[0]), res[1]))
     '''
 
-    res = asts.MTEOpenTable('SECURITIES', '        ', False)
-    #print('MTEOpenTable (%d): %s <%s>' %(res, asts.MTEErrorMsg(res), asts.MSGError()))
+    for br in ('TQCB', 'TQCB,PSAU,PSBB,TQIR,TQBR,TQPI'):
+    #for br in ('TQCB', ):
+        res = asts.MTESelectBoards(br)
+        if res[0] != asts.MTE_OK:
+            print('MTESelectBoards (%d): %s (%s)' % (res[0], asts.MTEErrorMsg(res[0]), res[1]))
+            break
+        for comp in (True, False):
+            res = asts.MTEOpenTable('SECURITIES', '        ', comp)
+            #print('MTEOpenTable (%d): %s <%s>' %(res, asts.MTEErrorMsg(res), asts.MSGError()))
+            key = 'SECURITIES.{0:s}.{1:s}'.format(br, str(comp))
+            Metrics.Var[key] = [(Metrics.Var[Metrics.VAR_LE], Metrics.Var['LastRead']), ]
 
-    for i in range(20):
-        Metrics.info('Iteration: %d' %i)
-        asts.MTEAddTable('SECURITIES')
-        asts.MTERefresh()
-        time.sleep(0.5)
+            for i in range(1, 100):
+                Metrics.info('Iteration: %d' %i)
+                asts.MTEAddTable('SECURITIES')
+                asts.MTERefresh()
+                if Metrics.Var['LastRead'] < 5:
+                    break
+                Metrics.Var[key].append((Metrics.Var[Metrics.VAR_LE], Metrics.Var['LastRead']))
+                time.sleep(0.2)
+            asts.MTECloseTable('SECURITIES')
+
+    for key in Metrics.Var:
+        if not key.startswith('SECURITIES'):
+            continue
+        k = key.split('.', 3)
+        print('Boards: %s. OpenTable Complete=%s' %(k[1], k[2]))
+        for i in range(len(Metrics.Var[key])):
+            print('{0:>2d}: Execute {1:>8.3f} ms. Read {2:>10,d} bytes'.format(i, Metrics.Var[key][i][0] / 1e6, Metrics.Var[key][i][1]))
+
     '''
     if res >= ASTS.MTE_OK:
         with open('MTEOpenTable.json', 'w') as fp:

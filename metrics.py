@@ -4,6 +4,8 @@ from time import time_ns
 
 class Metrics:
     _QUEUE = []
+    Var = {}
+    VAR_LE = 'LastExecute'
 
     def __init__(self, skepSelf=True, showArgs=True, timeSize='ms', *args, **kwargs):
         self._skepSelf = skepSelf
@@ -59,4 +61,5 @@ class Metrics:
             timeSize = 'ns'
             t = 1
 
+        Metrics.Var[Metrics.VAR_LE] = timeEnd - timeBegin
         return '%.3f %s' % ((timeEnd - timeBegin) / t, timeSize)

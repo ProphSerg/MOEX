@@ -25,6 +25,7 @@ class MTEMSG:
     def _toData(self):
         self._dataLen = self._msg.contents.DataLen
         Metrics.info('Read: {0:,d} bytes'.format(self._dataLen))
+        Metrics.Var['LastRead'] = self._dataLen
         self._data = cast(byref(self._msg[0]), POINTER(c_char * (self._dataLen + 4))).contents
         self._offset = 4
 
