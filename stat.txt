@@ -1,0 +1,349 @@
+>> Start: MTEConnect({'PACKETSIZE': '60000', 'INTERFACE': 'IFCBroker40', 'SERVER': 'UAT_GATEWAY', 'SERVICE': '16411/16412', 'BROADCAST': '91.208.232.211', 'USERID': 'MU9050300002', 'PASSWORD': '6204', 'LANGUAGE': 'Russian', 'LOGFOLDER': '/home/proph/PycharmProjects/MOEX/log/', 'LOGGING': '2,2', 'LOGLEVEL': '30'},)
+>> Stop: MTEConnect. Time: 4041.669 ms.
+
+MTESelectBoards(SNDX,RTSI) (-18): Rejected by Trading System ([035] Ни одного режима из заданного Вами списка в торговой системе нет, либо у Вас нет полномочий ни на один из этих режимов)
+MTESelectBoards(CETS) (-18): Rejected by Trading System ([035] Ни одного режима из заданного Вами списка в торговой системе нет, либо у Вас нет полномочий ни на один из этих режимов)
+
+Boards: PSAU,PSBB (bonds-first). OpenTable Complete=True
+ 0: Execute 1117.709 ms. Read    100,845 bytes
+----------------------------------------------
+Total read                       100,845 bytes
+
+Boards: PSAU,PSBB (bonds-first). OpenTable Complete=False
+ 0: Execute  577.647 ms. Read    100,845 bytes
+----------------------------------------------
+Total read                       100,845 bytes
+
+Boards: TQCB,TQIR,TQOB,TQRD (bonds-second). OpenTable Complete=True
+ 0: Execute 8151.511 ms. Read  3,939,583 bytes
+ 1: Execute   84.933 ms. Read        122 bytes
+----------------------------------------------
+Total read                     3,939,705 bytes
+
+Boards: TQCB,TQIR,TQOB,TQRD (bonds-second). OpenTable Complete=False
+ 0: Execute 2959.407 ms. Read  1,781,785 bytes
+ 1: Execute  384.412 ms. Read    179,423 bytes
+ 2: Execute  358.463 ms. Read    179,450 bytes
+ 3: Execute  374.594 ms. Read    180,376 bytes
+ 4: Execute  380.140 ms. Read    182,069 bytes
+ 5: Execute  376.567 ms. Read    182,330 bytes
+ 6: Execute  377.588 ms. Read    181,823 bytes
+ 7: Execute  417.011 ms. Read    184,394 bytes
+ 8: Execute  410.955 ms. Read    160,498 bytes
+ 9: Execute  419.787 ms. Read    144,767 bytes
+10: Execute  406.665 ms. Read    171,942 bytes
+11: Execute  442.553 ms. Read    186,892 bytes
+12: Execute  398.459 ms. Read    197,394 bytes
+13: Execute   90.692 ms. Read     26,573 bytes
+----------------------------------------------
+Total read                     3,939,716 bytes
+
+Boards: TQBR,TQPI,TQIF,TQTF (shares). OpenTable Complete=True
+ 0: Execute 9509.045 ms. Read  4,810,333 bytes
+ 1: Execute   90.572 ms. Read        992 bytes
+ 2: Execute   62.075 ms. Read        387 bytes
+ 3: Execute   63.136 ms. Read        363 bytes
+ 4: Execute   63.612 ms. Read        810 bytes
+ 5: Execute   63.057 ms. Read        264 bytes
+ 6: Execute   62.573 ms. Read        597 bytes
+ 7: Execute   63.042 ms. Read        282 bytes
+ 8: Execute   63.639 ms. Read        717 bytes
+ 9: Execute   62.951 ms. Read        129 bytes
+10: Execute   62.685 ms. Read        504 bytes
+11: Execute   63.448 ms. Read        516 bytes
+12: Execute   62.799 ms. Read        645 bytes
+13: Execute   62.752 ms. Read        129 bytes
+14: Execute   63.171 ms. Read      1,192 bytes
+15: Execute   61.358 ms. Read        363 bytes
+16: Execute   63.923 ms. Read        852 bytes
+17: Execute   62.846 ms. Read        129 bytes
+18: Execute   68.620 ms. Read      1,017 bytes
+19: Execute   63.257 ms. Read        363 bytes
+20: Execute   63.792 ms. Read        787 bytes
+21: Execute   62.270 ms. Read        270 bytes
+22: Execute   63.526 ms. Read        665 bytes
+23: Execute   63.581 ms. Read        480 bytes
+24: Execute   63.128 ms. Read        246 bytes
+25: Execute   61.007 ms. Read        621 bytes
+26: Execute   63.484 ms. Read        367 bytes
+27: Execute   63.348 ms. Read        491 bytes
+28: Execute   62.920 ms. Read        129 bytes
+29: Execute   61.732 ms. Read        480 bytes
+30: Execute   61.759 ms. Read        381 bytes
+31: Execute   62.119 ms. Read        410 bytes
+32: Execute   62.418 ms. Read        246 bytes
+33: Execute   62.668 ms. Read      1,044 bytes
+34: Execute   62.596 ms. Read        246 bytes
+35: Execute   64.003 ms. Read        466 bytes
+----------------------------------------------
+Total read                     4,827,913 bytes
+
+Boards: TQBR,TQPI,TQIF,TQTF (shares). OpenTable Complete=False
+ 0: Execute 3314.966 ms. Read  2,081,053 bytes
+ 1: Execute  445.797 ms. Read    179,986 bytes
+ 2: Execute  416.832 ms. Read    178,679 bytes
+ 3: Execute  429.198 ms. Read    180,268 bytes
+ 4: Execute  431.629 ms. Read    179,962 bytes
+ 5: Execute  432.416 ms. Read    180,884 bytes
+ 6: Execute  431.471 ms. Read    182,569 bytes
+ 7: Execute  473.821 ms. Read    182,347 bytes
+ 8: Execute  441.135 ms. Read    185,568 bytes
+ 9: Execute  612.174 ms. Read    182,128 bytes
+10: Execute  476.467 ms. Read    151,478 bytes
+11: Execute  469.806 ms. Read    156,227 bytes
+12: Execute  468.442 ms. Read    153,788 bytes
+13: Execute  460.795 ms. Read    178,102 bytes
+14: Execute  447.546 ms. Read    187,484 bytes
+15: Execute  451.319 ms. Read    194,297 bytes
+16: Execute  235.903 ms. Read     76,017 bytes
+17: Execute   64.708 ms. Read        738 bytes
+18: Execute   62.876 ms. Read        264 bytes
+19: Execute   64.108 ms. Read      1,037 bytes
+20: Execute   63.291 ms. Read        633 bytes
+21: Execute   63.797 ms. Read        634 bytes
+22: Execute   62.899 ms. Read        129 bytes
+23: Execute   64.690 ms. Read      1,178 bytes
+24: Execute   63.762 ms. Read        508 bytes
+25: Execute   63.648 ms. Read        129 bytes
+26: Execute   83.757 ms. Read        363 bytes
+27: Execute   63.399 ms. Read        399 bytes
+28: Execute   63.623 ms. Read        762 bytes
+29: Execute   63.350 ms. Read        246 bytes
+30: Execute   62.015 ms. Read        483 bytes
+31: Execute   63.382 ms. Read        498 bytes
+32: Execute   63.547 ms. Read        648 bytes
+33: Execute   62.952 ms. Read        147 bytes
+34: Execute   62.354 ms. Read        878 bytes
+35: Execute   64.190 ms. Read        615 bytes
+36: Execute   63.880 ms. Read        528 bytes
+37: Execute   63.268 ms. Read        264 bytes
+38: Execute   62.250 ms. Read        981 bytes
+39: Execute   61.645 ms. Read        246 bytes
+40: Execute   63.548 ms. Read        662 bytes
+41: Execute   62.119 ms. Read        270 bytes
+42: Execute   62.949 ms. Read        381 bytes
+43: Execute   63.386 ms. Read        473 bytes
+44: Execute   63.440 ms. Read        473 bytes
+45: Execute   62.080 ms. Read        693 bytes
+46: Execute   61.623 ms. Read        381 bytes
+47: Execute   63.419 ms. Read        774 bytes
+48: Execute   62.947 ms. Read        363 bytes
+49: Execute   61.150 ms. Read        765 bytes
+50: Execute   62.791 ms. Read        498 bytes
+51: Execute   63.333 ms. Read        641 bytes
+52: Execute   63.033 ms. Read        257 bytes
+53: Execute   62.551 ms. Read        650 bytes
+54: Execute   61.664 ms. Read        473 bytes
+55: Execute   63.905 ms. Read        473 bytes
+56: Execute   62.554 ms. Read        129 bytes
+57: Execute   63.448 ms. Read        707 bytes
+58: Execute   62.122 ms. Read        498 bytes
+59: Execute   63.537 ms. Read        638 bytes
+60: Execute   63.073 ms. Read        246 bytes
+61: Execute   64.963 ms. Read        821 bytes
+62: Execute   68.203 ms. Read        731 bytes
+63: Execute   63.455 ms. Read        246 bytes
+64: Execute   61.997 ms. Read        377 bytes
+65: Execute   63.517 ms. Read        381 bytes
+66: Execute   61.323 ms. Read        473 bytes
+67: Execute   65.245 ms. Read        525 bytes
+68: Execute   62.638 ms. Read      1,068 bytes
+69: Execute   63.103 ms. Read        246 bytes
+70: Execute   63.302 ms. Read        540 bytes
+71: Execute   62.839 ms. Read        147 bytes
+72: Execute   62.190 ms. Read        597 bytes
+73: Execute   62.925 ms. Read        381 bytes
+74: Execute   63.533 ms. Read        452 bytes
+75: Execute   63.011 ms. Read        264 bytes
+76: Execute   63.179 ms. Read        913 bytes
+77: Execute   63.016 ms. Read        246 bytes
+78: Execute   63.787 ms. Read        583 bytes
+79: Execute   62.882 ms. Read        246 bytes
+80: Execute   64.736 ms. Read        621 bytes
+81: Execute   64.998 ms. Read        781 bytes
+82: Execute   70.013 ms. Read        311 bytes
+83: Execute   61.411 ms. Read        246 bytes
+84: Execute   62.065 ms. Read        648 bytes
+85: Execute   69.669 ms. Read      4,189 bytes
+86: Execute   63.361 ms. Read        122 bytes
+87: Execute   62.131 ms. Read        396 bytes
+88: Execute   63.897 ms. Read        480 bytes
+89: Execute   63.680 ms. Read        652 bytes
+90: Execute   63.044 ms. Read        147 bytes
+91: Execute   62.174 ms. Read        630 bytes
+92: Execute   63.229 ms. Read        356 bytes
+93: Execute   63.428 ms. Read        507 bytes
+94: Execute   62.959 ms. Read        246 bytes
+95: Execute   62.867 ms. Read        938 bytes
+96: Execute   60.693 ms. Read        498 bytes
+97: Execute   63.419 ms. Read        678 bytes
+98: Execute   62.902 ms. Read        263 bytes
+99: Execute   62.065 ms. Read        399 bytes
+----------------------------------------------
+Total read                     4,855,935 bytes
+
+Boards: PSAU,PSBB,TQCB,TQIR,TQOB,TQRD,SNDX,RTSI,CETS,TQBR,TQPI,TQIF,TQTF (all). OpenTable Complete=True
+ 0: Execute 11112.117 ms. Read  4,810,701 bytes
+ 1: Execute   91.713 ms. Read      1,910 bytes
+ 2: Execute   62.162 ms. Read        129 bytes
+ 3: Execute   63.526 ms. Read        813 bytes
+ 4: Execute   63.125 ms. Read        491 bytes
+ 5: Execute   63.789 ms. Read        484 bytes
+ 6: Execute   62.123 ms. Read        520 bytes
+ 7: Execute   62.557 ms. Read        356 bytes
+ 8: Execute   62.447 ms. Read        833 bytes
+ 9: Execute   65.253 ms. Read        293 bytes
+10: Execute   61.638 ms. Read        246 bytes
+11: Execute   62.446 ms. Read        783 bytes
+12: Execute   63.713 ms. Read        711 bytes
+13: Execute   63.191 ms. Read        246 bytes
+14: Execute   63.544 ms. Read        538 bytes
+15: Execute   62.873 ms. Read        363 bytes
+16: Execute   63.594 ms. Read        590 bytes
+17: Execute   62.577 ms. Read        147 bytes
+18: Execute   63.872 ms. Read        909 bytes
+19: Execute   63.114 ms. Read        498 bytes
+20: Execute   63.724 ms. Read        657 bytes
+21: Execute   62.046 ms. Read        264 bytes
+22: Execute   71.920 ms. Read      1,173 bytes
+23: Execute   63.734 ms. Read        871 bytes
+24: Execute   63.097 ms. Read        129 bytes
+25: Execute   62.243 ms. Read        784 bytes
+26: Execute   63.015 ms. Read        363 bytes
+27: Execute   63.196 ms. Read        363 bytes
+28: Execute   61.576 ms. Read        381 bytes
+29: Execute   63.369 ms. Read        648 bytes
+30: Execute   63.060 ms. Read        480 bytes
+31: Execute   63.611 ms. Read        740 bytes
+32: Execute   63.079 ms. Read        381 bytes
+33: Execute   65.263 ms. Read        707 bytes
+34: Execute   71.458 ms. Read        246 bytes
+35: Execute   63.877 ms. Read        489 bytes
+36: Execute   63.010 ms. Read        264 bytes
+37: Execute   62.469 ms. Read        662 bytes
+38: Execute   63.112 ms. Read        363 bytes
+39: Execute   63.069 ms. Read        356 bytes
+40: Execute   61.838 ms. Read        239 bytes
+41: Execute   63.353 ms. Read        754 bytes
+42: Execute   64.482 ms. Read        520 bytes
+43: Execute   62.891 ms. Read        363 bytes
+44: Execute   62.065 ms. Read        129 bytes
+45: Execute   63.329 ms. Read        590 bytes
+46: Execute   63.813 ms. Read        718 bytes
+47: Execute   63.005 ms. Read        257 bytes
+48: Execute   61.767 ms. Read        403 bytes
+49: Execute   63.237 ms. Read        613 bytes
+50: Execute   63.259 ms. Read        480 bytes
+51: Execute   62.789 ms. Read        147 bytes
+52: Execute   62.189 ms. Read        765 bytes
+53: Execute   62.918 ms. Read        246 bytes
+54: Execute   62.367 ms. Read        531 bytes
+55: Execute   62.751 ms. Read        129 bytes
+56: Execute   63.920 ms. Read        882 bytes
+57: Execute   61.351 ms. Read        246 bytes
+58: Execute   63.545 ms. Read        572 bytes
+59: Execute   61.914 ms. Read        473 bytes
+60: Execute   63.028 ms. Read        356 bytes
+61: Execute   63.627 ms. Read        480 bytes
+62: Execute   63.294 ms. Read        549 bytes
+63: Execute   63.693 ms. Read        666 bytes
+64: Execute   62.859 ms. Read        480 bytes
+65: Execute   63.343 ms. Read        655 bytes
+66: Execute   63.282 ms. Read        288 bytes
+67: Execute   63.399 ms. Read        480 bytes
+68: Execute   64.340 ms. Read        495 bytes
+69: Execute   62.890 ms. Read        808 bytes
+70: Execute   62.183 ms. Read        246 bytes
+71: Execute   64.345 ms. Read      1,015 bytes
+72: Execute   62.840 ms. Read        129 bytes
+73: Execute   63.199 ms. Read        473 bytes
+74: Execute   67.851 ms. Read        147 bytes
+75: Execute   64.034 ms. Read        931 bytes
+76: Execute   63.953 ms. Read        473 bytes
+77: Execute   63.550 ms. Read        671 bytes
+78: Execute   60.604 ms. Read        381 bytes
+79: Execute   62.211 ms. Read        673 bytes
+80: Execute   63.889 ms. Read        741 bytes
+81: Execute   62.853 ms. Read        129 bytes
+82: Execute   63.447 ms. Read        461 bytes
+83: Execute   63.141 ms. Read        246 bytes
+84: Execute   63.081 ms. Read        363 bytes
+85: Execute   62.902 ms. Read        367 bytes
+86: Execute   63.491 ms. Read        632 bytes
+87: Execute   62.955 ms. Read        342 bytes
+88: Execute   62.647 ms. Read        761 bytes
+89: Execute   62.986 ms. Read        129 bytes
+90: Execute   62.977 ms. Read        893 bytes
+91: Execute   63.126 ms. Read        363 bytes
+92: Execute   63.346 ms. Read        380 bytes
+93: Execute   62.669 ms. Read        257 bytes
+94: Execute   63.272 ms. Read        662 bytes
+95: Execute   63.134 ms. Read        480 bytes
+96: Execute   63.130 ms. Read        356 bytes
+97: Execute   62.856 ms. Read        374 bytes
+98: Execute   63.808 ms. Read        724 bytes
+99: Execute   63.671 ms. Read        788 bytes
+----------------------------------------------
+Total read                     4,860,783 bytes
+
+Boards: PSAU,PSBB,TQCB,TQIR,TQOB,TQRD,SNDX,RTSI,CETS,TQBR,TQPI,TQIF,TQTF (all). OpenTable Complete=False
+ 0: Execute 3441.595 ms. Read  2,081,053 bytes
+ 1: Execute  435.460 ms. Read    179,986 bytes
+ 2: Execute  432.591 ms. Read    178,679 bytes
+ 3: Execute  433.062 ms. Read    180,346 bytes
+ 4: Execute  433.232 ms. Read    179,673 bytes
+ 5: Execute  447.432 ms. Read    181,173 bytes
+ 6: Execute  495.602 ms. Read    182,569 bytes
+ 7: Execute  490.240 ms. Read    182,347 bytes
+ 8: Execute  482.787 ms. Read    185,646 bytes
+ 9: Execute  524.213 ms. Read    181,851 bytes
+10: Execute  479.408 ms. Read    151,648 bytes
+11: Execute  476.308 ms. Read    156,120 bytes
+12: Execute  478.000 ms. Read    153,811 bytes
+13: Execute  464.758 ms. Read    178,271 bytes
+14: Execute  466.664 ms. Read    187,795 bytes
+15: Execute  458.790 ms. Read    194,184 bytes
+16: Execute  237.913 ms. Read     75,559 bytes
+17: Execute   64.235 ms. Read        707 bytes
+18: Execute   61.919 ms. Read        147 bytes
+19: Execute   63.852 ms. Read        877 bytes
+20: Execute   62.504 ms. Read        129 bytes
+21: Execute   64.129 ms. Read        912 bytes
+22: Execute   61.650 ms. Read        381 bytes
+23: Execute   63.686 ms. Read        900 bytes
+24: Execute   61.480 ms. Read        264 bytes
+25: Execute   64.205 ms. Read        905 bytes
+26: Execute   61.599 ms. Read        147 bytes
+27: Execute   63.423 ms. Read        942 bytes
+28: Execute   63.150 ms. Read        246 bytes
+29: Execute   63.590 ms. Read        597 bytes
+30: Execute   62.352 ms. Read        798 bytes
+31: Execute   61.366 ms. Read        381 bytes
+32: Execute   72.301 ms. Read      1,022 bytes
+33: Execute   62.486 ms. Read        147 bytes
+34: Execute   64.854 ms. Read      1,050 bytes
+35: Execute   62.732 ms. Read        282 bytes
+36: Execute   69.329 ms. Read      3,973 bytes
+37: Execute   61.914 ms. Read        122 bytes
+38: Execute   64.658 ms. Read      1,130 bytes
+39: Execute   62.577 ms. Read        129 bytes
+40: Execute   63.382 ms. Read        679 bytes
+41: Execute   62.177 ms. Read        478 bytes
+42: Execute   63.517 ms. Read        625 bytes
+43: Execute   63.297 ms. Read        129 bytes
+44: Execute   63.571 ms. Read        912 bytes
+45: Execute   61.634 ms. Read        381 bytes
+46: Execute   60.514 ms. Read        597 bytes
+47: Execute   62.319 ms. Read        614 bytes
+48: Execute   63.396 ms. Read        356 bytes
+49: Execute   63.443 ms. Read        744 bytes
+50: Execute   63.518 ms. Read        264 bytes
+51: Execute   63.352 ms. Read        466 bytes
+52: Execute   62.270 ms. Read        360 bytes
+53: Execute   63.798 ms. Read        853 bytes
+54: Execute   61.674 ms. Read        374 bytes
+55: Execute   62.502 ms. Read        857 bytes
+56: Execute   61.907 ms. Read        246 bytes
+57: Execute   63.504 ms. Read        707 bytes
+----------------------------------------------
+Total read                     4,836,541 bytes
