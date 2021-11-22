@@ -1,6 +1,10 @@
 >> Start: MTEConnect({'PACKETSIZE': '60000', 'INTERFACE': 'IFCBroker40', 'SERVER': 'UAT_GATEWAY', 'SERVICE': '16411/16412', 'BROADCAST': '91.208.232.211', 'USERID': 'MU9050300002', 'PASSWORD': '6204', 'LANGUAGE': 'Russian', 'LOGFOLDER': '/home/proph/PycharmProjects/MOEX/log/', 'LOGGING': '2,2', 'LOGLEVEL': '30'},)
 >> Stop: MTEConnect. Time: 4041.669 ms.
 
+>>>> Start: toMTEStructure(0, 2)
+==== Info: Read: 196,334 bytes
+>>>> Stop: toMTEStructure. Time: 20.383 ms.
+
 MTESelectBoards(SNDX,RTSI) (-18): Rejected by Trading System ([035] Ни одного режима из заданного Вами списка в торговой системе нет, либо у Вас нет полномочий ни на один из этих режимов)
 MTESelectBoards(CETS) (-18): Rejected by Trading System ([035] Ни одного режима из заданного Вами списка в торговой системе нет, либо у Вас нет полномочий ни на один из этих режимов)
 
