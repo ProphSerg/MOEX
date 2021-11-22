@@ -304,7 +304,11 @@ class ASTS:
         if isinstance(_tabno, str):
             _tabno = self._mtemsg.findTable(_tabno)
 
+        self._mtemsg.closeMTETable(_tabno)
         return self._lib.MTECloseTable(self._Idx, _tabno)
+
+    def TableData(self, _table):
+        return self._mtemsg.TableData(_table)
 
     #int32_t MTEFreeBuffer(int32_t conno);
     @Metrics()
@@ -380,18 +384,51 @@ if __name__ == '__main__':
     #res = asts.MTESelectBoards('CETS')
     print('MTESelectBoards (%d): %s (%s)' %(res[0], asts.MTEErrorMsg(res[0]), res[1]))
     '''
+    def printTableData(table, rowMax=None):
+        tb = asts.TableData(table)
+        rT = [ ('     ', 5, 'row'), ]
+        for fl in tb['fields']:
+            _len = max(len(fl['name']), fl['size'])
+            rT.append( (('{0:^%ds}' %_len).format(fl['name']), _len, fl['name']) )
+        print('|'.join(map(lambda x: x[0], rT)))
 
-    for br in ('TQCB', 'TQCB,PSAU,PSBB,TQIR,TQBR,TQPI'):
+        rwc = 1
+        for rw in tb['rows']:
+            if rowMax is not None and rwc > rowMax:
+                break
+            r = [ (('{0:>%dd}' %rT[0][1]).format(rwc))]
+            for fl in range(1, len(rT)):
+                r.append( ('{0:%ds}' %rT[fl][1]).format(rw[rT[fl][2]] if rT[fl][2] in rw else '') )
+            print('|'.join(r))
+            rwc += 1
+
+    #for tbn in ('TRDTIMETYPES', 'TRDTIMEGROUPS', 'TRADETIME'):
+    for tbn in ('TESYSTIME', ):
+        res = asts.MTEOpenTable(tbn, '', True)
+        if res < asts.MTE_OK:
+            print('MTEOpenTable (%d): %s <%s>' % (res, asts.MTEErrorMsg(res), asts.MSGError()))
+            continue
+        printTableData(tbn)
+    #exit(0)
+
+    Metrics.noPrint = True
+    boards = [ ('PSAU,PSBB', 'bonds-first'), ('TQCB,TQIR,TQOB,TQRD', 'bonds-second'), ('SNDX,RTSI', 'indexes'), ('CETS', 'currencies'), ('TQBR,TQPI,TQIF,TQTF', 'shares') ]
+    boards.append((','.join(map(lambda x: str(x[0]), boards)), 'all'))
+    for br in boards:
     #for br in ('TQCB', ):
-        res = asts.MTESelectBoards(br)
+        res = asts.MTESelectBoards(br[0])
         if res[0] != asts.MTE_OK:
-            print('MTESelectBoards (%d): %s (%s)' % (res[0], asts.MTEErrorMsg(res[0]), res[1]))
-            break
+            print('MTESelectBoards(%s) (%d): %s (%s)' % (br[0], res[0], asts.MTEErrorMsg(res[0]), res[1]))
+            continue
         for comp in (True, False):
             res = asts.MTEOpenTable('SECURITIES', '        ', comp)
-            #print('MTEOpenTable (%d): %s <%s>' %(res, asts.MTEErrorMsg(res), asts.MSGError()))
-            key = 'SECURITIES.{0:s}.{1:s}'.format(br, str(comp))
+            if res < asts.MTE_OK:
+                print('MTEOpenTable (%d): %s <%s>' %(res, asts.MTEErrorMsg(res), asts.MSGError()))
+                break
+            key = 'SECURITIES.{0:s}.{1:s}.{2:s}'.format(br[0], str(comp), br[1])
             Metrics.Var[key] = [(Metrics.Var[Metrics.VAR_LE], Metrics.Var['LastRead']), ]
+            #printTableData('SECURITIES', rowMax=100)
+            #exit(0)
 
             for i in range(1, 100):
                 Metrics.info('Iteration: %d' %i)
@@ -406,11 +443,13 @@ if __name__ == '__main__':
     for key in Metrics.Var:
         if not key.startswith('SECURITIES'):
             continue
-        k = key.split('.', 3)
-        print('Boards: %s. OpenTable Complete=%s' %(k[1], k[2]))
+        k = key.split('.', 4)
+        print('Boards: %s (%s). OpenTable Complete=%s' %(k[1], k[3], k[2]))
+        totalRead = 0
         for i in range(len(Metrics.Var[key])):
             print('{0:>2d}: Execute {1:>8.3f} ms. Read {2:>10,d} bytes'.format(i, Metrics.Var[key][i][0] / 1e6, Metrics.Var[key][i][1]))
-
+            totalRead += Metrics.Var[key][i][1]
+        print('{0:s}\n{1:<28s} {2:>11,d} bytes\n'.format('-' * 46, 'Total read', totalRead))
     '''
     if res >= ASTS.MTE_OK:
         with open('MTEOpenTable.json', 'w') as fp:

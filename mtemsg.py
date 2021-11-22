@@ -256,12 +256,22 @@ class MTEMSG:
             _fld = self._findTableFields(_tableName)
             self.MTETables[_HTable] = {
                 'TableName': _tableName,
+                'HTable': _HTable,
                 'fields': _fld,
             }
         else:
             _HTable = _ref
             _fld = self.MTETables[_HTable]['fields']
         self.MTETables[_HTable]['rows'] = self._getRows(_fld)
+
+    def closeMTETable(self, _Htable):
+        if _Htable in self.MTETables:
+            del self.MTETables[_Htable]
+
+    def TableData(self, _table):
+        if isinstance(_table, str):
+            _table = self.findTable(_table)
+        return self.MTETables[_table]
 
     def findTable(self, table):
         for t in self.MTETables:

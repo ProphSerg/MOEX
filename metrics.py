@@ -6,11 +6,13 @@ class Metrics:
     _QUEUE = []
     Var = {}
     VAR_LE = 'LastExecute'
+    noPrint = False
 
-    def __init__(self, skepSelf=True, showArgs=True, timeSize='ms', *args, **kwargs):
+    def __init__(self, skepSelf=True, showArgs=True, timeSize='ms', noPrint=False, *args, **kwargs):
         self._skepSelf = skepSelf
         self._showArgs = showArgs
         self._timeSize = timeSize
+        self.noPrint = noPrint
         pass
 
     def __call__(self, func):
@@ -29,23 +31,27 @@ class Metrics:
     def startMetric(_name, *args):
         # arg = ('%s%s' %(_name, ', '.join(map(str, args))), time_ns())
         # print('%s Start: %s %s' % ('>>' * (len(Metrics._QUEUE) + 1), _name, ', '.join(map(str, args))) )
-        print('%s Start: %s%s' % ('>>' * (len(Metrics._QUEUE) + 1), _name, str(args)))
+        if Metrics.noPrint == False:
+            print('%s Start: %s%s' % ('>>' * (len(Metrics._QUEUE) + 1), _name, str(args)))
         Metrics._QUEUE.append((_name, time_ns()))
 
     @staticmethod
     def stopMetric(timeSize='ms', *args):
         arg = Metrics._QUEUE.pop()
-        print('%s Stop: %s. Time: %s. %s' % (
-                '>>' * (len(Metrics._QUEUE) + 1),
-                arg[0],
-                Metrics._time_execute(timeBegin=arg[1], timeSize=timeSize),
-                '. '.join(args)
+        te = Metrics._time_execute(timeBegin=arg[1], timeSize=timeSize)
+        if Metrics.noPrint == False:
+            print('%s Stop: %s. Time: %s. %s' % (
+                    '>>' * (len(Metrics._QUEUE) + 1),
+                    arg[0],
+                    te,
+                    '. '.join(args)
+                )
             )
-        )
 
     @staticmethod
     def info(*args):
-        print('%s Info: %s' % ('==' * (len(Metrics._QUEUE)), ', '.join(map(str, args))))
+        if Metrics.noPrint == False:
+            print('%s Info: %s' % ('==' * (len(Metrics._QUEUE)), ', '.join(map(str, args))))
 
     @staticmethod
     def _time_execute(timeBegin, timeEnd=None, timeSize='ms'):
