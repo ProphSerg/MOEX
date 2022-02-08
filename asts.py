@@ -1,3 +1,4 @@
+import sys
 import time
 from ctypes import *
 import os
@@ -347,7 +348,7 @@ if __name__ == '__main__':
         'LOGFOLDER': os.path.dirname(os.path.abspath(__file__)) + '/log/',
         'LOGGING': '2,2',
         'LOGLEVEL': '30',
-        #'BOARDS': 'TQCB',
+        'BOARDS': 'TQBR',
 #        'BOARDS': 'TQCB,PSAU,PSBB,TQIR,TQBR,TQPI',
     })
     asts.printConnectStatus()
@@ -384,50 +385,78 @@ if __name__ == '__main__':
     #res = asts.MTESelectBoards('CETS')
     print('MTESelectBoards (%d): %s (%s)' %(res[0], asts.MTEErrorMsg(res[0]), res[1]))
     '''
-    def printTableData(table, rowMax=None):
+    def printTableData(table, rowMax=None, title=True, file=sys.stdout, filter=None, prefix=''):
         tb = asts.TableData(table)
         rT = [ ('     ', 5, 'row'), ]
         for fl in tb['fields']:
             _len = max(len(fl['name']), fl['size'])
             rT.append( (('{0:^%ds}' %_len).format(fl['name']), _len, fl['name']) )
-        print('|'.join(map(lambda x: x[0], rT)))
+        if title == True:
+            print('|'.join(map(lambda x: x[0], rT)) + '|', file=file)
 
         rwc = 1
         for rw in tb['rows']:
             if rowMax is not None and rwc > rowMax:
                 break
-            r = [ (('{0:>%dd}' %rT[0][1]).format(rwc))]
+            if filter is not None:
+                F = next(iter(filter))
+                if F in rw and not rw[F].strip() in filter[F]:
+                    continue
+            r = [ (('{0:s}{1:>%dd}' %(rT[0][1] - len(prefix))).format(prefix, rwc))]
             for fl in range(1, len(rT)):
-                r.append( ('{0:%ds}' %rT[fl][1]).format(rw[rT[fl][2]] if rT[fl][2] in rw else '') )
-            print('|'.join(r))
+                r.append( ('{0:%ds}' %rT[fl][1]).format(rw[rT[fl][2]].lstrip('0') if rT[fl][2] in rw else '') )
+            print('|'.join(r) + '|', file=file)
             rwc += 1
 
     #for tbn in ('TRDTIMETYPES', 'TRDTIMEGROUPS', 'TRADETIME'):
-    for tbn in ('TESYSTIME', ):
+    '''
+    for tbn in ('TESYSTIME', 'CURRENCY', 'BOARDS', 'MARKETS', 'SECTYPE'):
         res = asts.MTEOpenTable(tbn, '', True)
         if res < asts.MTE_OK:
             print('MTEOpenTable (%d): %s <%s>' % (res, asts.MTEErrorMsg(res), asts.MSGError()))
             continue
         printTableData(tbn)
-    #exit(0)
+    '''
+    Metrics.noPrint = True
+
+    fo = open('SBERP.csv', 'w')
+    res = asts.MTEOpenTable('SECURITIES', '        ', False)
+    if res < asts.MTE_OK:
+        print('MTEOpenTable (%d): %s <%s>' % (res, asts.MTEErrorMsg(res), asts.MSGError()))
+    else:
+        printTableData('SECURITIES', filter={'SECCODE': ('SBERP',)}, file=fo)
+        for i in range(1, 5):
+            asts.MTEAddTable('SECURITIES')
+            time.sleep(0.4)
+            asts.MTERefresh()
+            printTableData('SECURITIES', title=False, filter={'SECCODE': ('SBERP',)}, prefix='%d:' %i, file=fo)
+    fo.close()
+
+    exit(0)
+
 
     Metrics.noPrint = True
-    boards = [ ('PSAU,PSBB', 'bonds-first'), ('TQCB,TQIR,TQOB,TQRD', 'bonds-second'), ('SNDX,RTSI', 'indexes'), ('CETS', 'currencies'), ('TQBR,TQPI,TQIF,TQTF', 'shares') ]
+    #boards = [ ('PSAU,PSBB', 'bonds-first'), ('TQCB,TQIR,TQOB,TQRD', 'bonds-second'), ('SNDX,RTSI', 'indexes'), ('CETS', 'currencies'), ('TQBR,TQPI,TQIF,TQTF', 'shares') ]
+    #boards = [ ('PSAU,PSBB', 'bonds-first'), ('TQCB,TQIR,TQOB,TQRD', 'bonds-second'), ('TQBR,TQPI,TQIF,TQTF', 'shares-rus'), ('FQBR', 'shares-out') ]
+    boards = [ ('TQCB,TQIR,TQOB,TQRD', 'bonds-second'), ('TQBR,TQPI,TQIF,TQTF', 'shares-rus'), ('FQBR', 'shares-out') ]
     boards.append((','.join(map(lambda x: str(x[0]), boards)), 'all'))
     for br in boards:
     #for br in ('TQCB', ):
+        fo = open(br[1] + '.csv', 'w')
         res = asts.MTESelectBoards(br[0])
         if res[0] != asts.MTE_OK:
             print('MTESelectBoards(%s) (%d): %s (%s)' % (br[0], res[0], asts.MTEErrorMsg(res[0]), res[1]))
             continue
-        for comp in (True, False):
+        print('MTESelectBoards(%s) -> (%s)' % (br[0], res[1]))
+
+        for comp in (False,):
             res = asts.MTEOpenTable('SECURITIES', '        ', comp)
             if res < asts.MTE_OK:
                 print('MTEOpenTable (%d): %s <%s>' %(res, asts.MTEErrorMsg(res), asts.MSGError()))
                 break
             key = 'SECURITIES.{0:s}.{1:s}.{2:s}'.format(br[0], str(comp), br[1])
             Metrics.Var[key] = [(Metrics.Var[Metrics.VAR_LE], Metrics.Var['LastRead']), ]
-            #printTableData('SECURITIES', rowMax=100)
+            printTableData('SECURITIES', file=fo)
             #exit(0)
 
             for i in range(1, 100):
@@ -437,9 +466,12 @@ if __name__ == '__main__':
                 if Metrics.Var['LastRead'] < 5:
                     break
                 Metrics.Var[key].append((Metrics.Var[Metrics.VAR_LE], Metrics.Var['LastRead']))
+                #printTableData('SECURITIES', file=fo, title=False)
                 time.sleep(0.2)
             asts.MTECloseTable('SECURITIES')
+            asts.MTEFreeBuffer()
 
+        fo.close()
     for key in Metrics.Var:
         if not key.startswith('SECURITIES'):
             continue
